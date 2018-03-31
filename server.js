@@ -26,7 +26,7 @@ app.use(function (req, res, next) {
 app.post('/contact-me', (req, res) => {
     const { name, email, token, message, phone } = req.body;
     if (token != process.env.TOKEN || phone !== '') {
-        res.send('Not authorized' + token + phone);
+        res.send('Not authorized');
         return;
     }
 
