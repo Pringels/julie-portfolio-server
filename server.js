@@ -1,6 +1,7 @@
 require('dotenv').config()
-
+const Mustache = require('mustache');
 const nodemailer = require('nodemailer');
+const fs = require('fs');
 
 var transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -29,23 +30,38 @@ app.post('/', (req, res) => {
         return;
     }
 
-    const mailOptions = {
-        from: 'peterringelmann@gmail.com', // sender address
-        to: 'peterringelmann@gmail.com', // list of receivers
-        subject: 'You got a new message from ' + name + '!', // Subject line
-        html: `${message}`,// plain text body
+    var message_data = {
+        name,
+        email,
+        message
     };
 
-    transporter.sendMail(mailOptions, function (err, info) {
-        if (err) {
-            console.log(err)
-        }
-        else {
-            console.log(info);
-            res.setHeader('Content-Type', 'application/json');
-            res.send(JSON.stringify({ sendstatus: 1 }));
-        }
+    fs.readFile('template.html', function (err, data) {
+        if (err) throw err;
+        var output = Mustache.render(data.toString(), message_data);
+
+        console
+
+        const mailOptions = {
+            from: process.env.SEND_ADDRESS, // sender address
+            to: process.env.RECEIVE_ADDRESS, // list of receivers
+            subject: 'You got a new message from ' + name + '!', // Subject line
+            html: output
+        };
+
+        transporter.sendMail(mailOptions, function (err, info) {
+            if (err) {
+                console.log(err)
+            }
+            else {
+                console.log(info);
+                res.setHeader('Content-Type', 'application/json');
+                res.send(JSON.stringify({ sendstatus: 1 }));
+            }
+        });
     });
+
+
 
 })
 
